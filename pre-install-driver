@@ -78,6 +78,7 @@ if [[ "$action" = "update" ]]; then
     sudo rm -f "/etc/kernel/cmdline.d/blacklist-nouveau.conf"
     sudo rm -f "/etc/kernel/cmdline.d/ignore-mod-sig.conf"
     sudo rm -f "/etc/kernel/cmdline.d/nvidia-drm.conf"
+    sudo rm -f "/etc/kernel/cmdline.d/rcu.conf"
     sudo rm -f "/etc/kernel/cmdline-removal.d/intel-iommu.conf"
     sudo rm -f "/etc/swupd/config"
     sudo rm -f "/etc/systemd/system/fix-nvidia-libGL-trigger.service"
@@ -160,6 +161,16 @@ if [[ ! -f "/etc/kernel/cmdline.d/nvidia-drm.conf" ]]; then
     echo "Enabling nvidia-drm modeset via boot parameters."
     sudo tee "/etc/kernel/cmdline.d/nvidia-drm.conf" >/dev/null <<'EOF'
 nvidia-drm.modeset=1 initcall_blacklist=simpledrm_platform_driver_init
+EOF
+fi
+
+# Adjust rcupdate and rcutree parameters to rid of rcu_sched stalls.
+# The timeout is set to low in Clear Linux. Setting params to Fedora 37 values.
+if [[ ! -f "/etc/kernel/cmdline.d/rcu.conf" ]]; then
+    update_boot=1
+    echo "Adjusting rcupdate and rcutree via boot parameters."
+    sudo tee "/etc/kernel/cmdline.d/rcu.conf" >/dev/null <<'EOF'
+rcupdate.rcu_exp_cpu_stall_timeout=21000 rcutree.rcu_nocb_gp_stride=-1
 EOF
 fi
 

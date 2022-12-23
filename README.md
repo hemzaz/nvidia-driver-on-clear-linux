@@ -4,13 +4,13 @@ An automation **how-to** for installing the NVIDIA proprietary driver on Clear L
 
 ## Clear Linux OS installation
 
-*Starting fresh? Obtain a recent Clear Linux image from the [release archive](https://cdn.download.clearlinux.org/releases/) (>= 36740, 37230, 37860 or later; but not [37810-37850](https://github.com/clearlinux/distribution/issues/2791)). Choose the LTS kernel (advanced options tab) during the OS installation for a better experience using NVIDIA graphics.*
+*Starting fresh? Obtain a recent Clear Linux image from the [release archive](https://cdn.download.clearlinux.org/releases/) (>= 36740, 37230, 37860 or later; but not [37810-37850](https://github.com/clearlinux/distribution/issues/2791)).*
 
 *Currently running CL 37810-37850? First update the OS to 37860 (or later) before installing the display driver.*
 
 Depending on the CL release, the open-source nouveau driver may not work with recent NVIDIA graphics (3000 series or later). The solution is to install the OS in text mode. Press the letter `e` on the boot screen and add `modprobe.blacklist=nouveau` to the list of kernel arguments. That will prevent the nouveau driver from loading. Press enter to boot the OS. Instructions are provided on the screen for running the installer.
 
-During setup, remember to enter `[A]` Advanced options. Select "Kernel Command Line" and add `modprobe.blacklist=nouveau` to "Add Extra Arguments". Go back to the prior screen and select `lts` under "Kernel Selection". Also disable automatic OS updates if desired.
+During setup, remember to enter `[A]` Advanced options. Select "Kernel Command Line" and add `modprobe.blacklist=nouveau` to "Add Extra Arguments". Optionally, go back to the prior screen and choose the `lts` or `native` kernel under "Kernel Selection". Also disable automatic OS updates if desired.
 
 ## NVIDIA driver installation
 
@@ -31,7 +31,7 @@ $ bash ./pre-install-driver
 $ reboot
 ```
 
-Next, run the driver installer script. Running the LTS kernel? Choose any driver in the list. Have a GeForce RTX 4000 series or running the native kernel? Specify `520` or later. Or provide the location of the `NVIDIA-Linux-x86_64-*` run-file.
+Next, run the driver installer script. Running the LTS kernel? Choose any driver in the list. Running the Native kernel or GeForce RTX 4000 series? Specify `520` or later. Or provide the location of the `NVIDIA-Linux-x86_64-*` run-file.
 
 If you have an NVIDIA Optimus laptop, choose 520. The 525 display driver is [problematic](https://github.com/elFarto/nvidia-vaapi-driver/issues/141).
 
@@ -129,8 +129,6 @@ Experiencing stutter or tearing when moving windows? Lanuch NVIDIA Settings and 
 ```
 
 NVIDIA may not boot on systems running Linux 5.18 (or later) with Intel CPUs. A workaround is to disable [Indirect Branch Tracking](https://edc.intel.com/content/www/us/en/design/ipla/software-development-platforms/client/platforms/alder-lake-desktop/12th-generation-intel-core-processors-datasheet-volume-1-of-2/007/indirect-branch-tracking/) until this is fixed, deemed safe temporarily. Refer to [NVIDIA - ArchWiki](https://wiki.archlinux.org/title/NVIDIA).
-
-Note: Unnecessary running the Clear Linux 5.15 (LTS 2021) kernel.
 
 ```bash
 sudo mkdir -p /etc/kernel/cmdline.d
