@@ -4,9 +4,7 @@ An automation **how-to** for installing the NVIDIA proprietary driver on Clear L
 
 ## Clear Linux OS installation
 
-*Starting fresh? Obtain a recent Clear Linux image from the [release archive](https://cdn.download.clearlinux.org/releases/) (>= 36740, 37230, 37860 or later; but not [37810-37850](https://github.com/clearlinux/distribution/issues/2791)).*
-
-*Currently running CL 37810-37850? First update the OS to 37860 (or later) before installing the display driver.*
+*Starting fresh? Obtain a recent Clear Linux image from the [release archive](https://cdn.download.clearlinux.org/releases/) (>= 36740, 37230, 37860 or later; but not [37810-37850](https://github.com/clearlinux/distribution/issues/2791)). Currently running CL 37810-37850? First update the OS to 37860 (or later) before installing the display driver.*
 
 Depending on the CL release, the open-source nouveau driver may not work with recent NVIDIA graphics (3000 series or later). The solution is to install the OS in text mode. Press the letter `e` on the boot screen and add `modprobe.blacklist=nouveau` to the list of kernel arguments. That will prevent the nouveau driver from loading. Press enter to boot the OS. Instructions are provided on the screen for running the installer.
 
