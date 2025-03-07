@@ -2,6 +2,50 @@
 
 A **how-to** NVIDIA proprietary driver installation on Clear Linux OS.
 
+## Quick Start with Make
+
+This repository now includes a Makefile for one-command installation:
+
+```bash
+# For GNOME desktop (default):
+make install-all    # One command to install everything
+
+# For KDE desktop (prevents black screen):
+make install-all-kde
+
+# If you experience any issues after installation:
+make fix-issues     # Automatically fix common problems
+```
+
+Or step-by-step if you prefer more control:
+
+```bash
+# Update configuration files
+make prepare-update
+
+# Switch to text mode
+make prepare
+
+# Install the driver (select one)
+make install-550    # NVIDIA driver version 550
+make install-560    # NVIDIA driver version 560 (recommended for CUDA)
+make install-565    # NVIDIA driver version 565
+make install-570    # NVIDIA driver version 570
+make install        # Latest NVIDIA driver
+
+# Install KDE (if desired, prevents black screen)
+make install-kde
+
+# Install CUDA toolkit (optional)
+make install-cuda
+
+# Build hardware acceleration (optional)
+make hw-accel
+
+# Check all commands
+make help
+```
+
 ## Preparation
 
 **Starting fresh?** Obtain the current image from the Clear Linux [Downloads](https://www.clearlinux.org/downloads.html) page.
@@ -32,19 +76,20 @@ $ bash ./pre-install-driver
 
 Next, run the driver installer script. Specifying [latest](https://download.nvidia.com/XFree86/Linux-x86_64/latest.txt) installs the latest production release. Check first before installation. Or specify the desired version or path to the installer file.
 
-| Driver | Version                          |
-|--------|----------------------------------|
-| latest | [latest.txt](https://download.nvidia.com/XFree86/Linux-x86_64/latest.txt) |
-| 550    | 550.135 NVIDIA Recommended       |
-| 560    | 560.35.05 Latest CUDA Driver     |
-| 565    | 565.77 Latest New Feature Branch |
-| vulkan | 550.40.81 Vulkan Beta Driver     |
+| Driver | Version                          | Description                      |
+|--------|----------------------------------|----------------------------------|
+| latest | [latest.txt](https://download.nvidia.com/XFree86/Linux-x86_64/latest.txt) | Latest official release |
+| 550    | 550.135 | Recommended Long-Term Support    |
+| 560    | 560.35.05 | CUDA 12.6 Optimized Driver     |
+| 565    | 565.77 | New Feature Branch               |
+| 570    | 570.53.14 | Latest Series                  |
+| vulkan | 550.40.81 | Vulkan Beta Driver            |
 
 ```bash
 $ bash ./install-driver help
-Usage: install-driver latest|550|560|565|vulkan|<pathname>
+Usage: install-driver latest|550|560|565|570|vulkan|<pathname>
 
-$ bash ./install-driver 550
+$ bash ./install-driver 560  # CUDA optimized driver
 $ sudo reboot
 ```
 
@@ -52,19 +97,26 @@ $ sudo reboot
 
 Installing the CUDA Toolkit is optional. The "auto" argument is preferred and will install the version suitable for the display driver. If the display driver is not in the table, then the script will fetch the latest CUDA run-file. If unsure, install the CUDA version matching the display driver or a lower version supported by the application (e.g. Blender).
 
-| Driver | CUDA Toolkit |
-|--------|--------------|
-|  560   |    12.6.3    |
-|  550   |    12.4.1    |
-|  535   |    12.2.2    |
-|  520   |    11.8.0    |
+| Driver | CUDA Toolkit | Command              |
+|--------|--------------|----------------------|
+|  570   |    12.6.3    | `make install-cuda-126` |
+|  560   |    12.6.3    | `make install-cuda-126` |
+|  565   |    12.4.1    | `make install-cuda-124` |
+|  550   |    12.4.1    | `make install-cuda-124` |
+|  535   |    12.2.2    | `make install-cuda-122` |
+|  520   |    11.8.0    | `make install-cuda-118` |
 
 ```bash
+# Using Makefile (recommended)
+$ make install-cuda           # auto-detect appropriate version
+$ make install-cuda-126       # install CUDA 12.6.x
+
+# Or using scripts directly
 $ bash ./install-cuda help
 Usage: install-cuda auto|latest|12.6|12.4|12.2|11.8|<pathname>
 
 $ bash ./install-cuda auto    # or path to run file
-$ bash ./install-cuda ~/Downloads/cuda_12.4.1_550.54.15_linux.run
+$ bash ./install-cuda ~/Downloads/cuda_12.6.3_560.35.05_linux.run
 ```
 
 Update `~/.bashrc` so that it can find the `nvcc` command.
@@ -180,9 +232,13 @@ gsettings set org.gnome.mutter experimental-features "['scale-monitor-framebuffe
 **Installing KDE?** Important, remove the `desktop-autostart` bundle to not autostart GDM resulting in black screen.
 
 ```bash
+# Use the built-in command (handles everything):
+make install-kde
+
+# Or manually:
 sudo swupd bundle-remove desktop-autostart
 sudo swupd bundle-add desktop-kde
-sudo swupd bundle-add desktop-kde-apps   # optional
+sudo swupd bundle-add desktop-kde-apps
 ```
 
 ## See also

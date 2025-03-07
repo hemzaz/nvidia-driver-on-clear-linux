@@ -1,0 +1,103 @@
+#!/usr/bin/env bash
+# fix-common-issues - Script to automatically fix common NVIDIA driver issues on Clear Linux
+# Usage: bash ./fix-common-issues
+
+# Source common utility functions if available
+if [[ -f "common.sh" ]]; then
+    source "common.sh"
+else
+    # Fallback to traditional check if common.sh is not available
+    [[ $(source "/etc/os-release" 2>/dev/null; echo "$ID") == "clear-linux-os" ]] || exit 1
+fi
+
+# Check if NVIDIA driver is installed
+if [[ ! -d /proc/driver/nvidia ]]; then
+    echo "ERROR: NVIDIA driver is not installed. Please install it first."
+    echo "Run: make install-all"
+    exit 1
+fi
+
+echo "===== NVIDIA Driver Issue Fixer ====="
+echo "This script will fix common issues with NVIDIA drivers on Clear Linux"
+
+# Fix 1: Wayland and X11 apps crashing
+echo -e "\n[1/5] Fixing Wayland and X11 apps crashing issues..."
+if ! grep -q "^__EGL_VENDOR_LIBRARY_FILENAMES=" /etc/environment; then
+    echo "Adding EGL vendor path to system environment..."
+    sudo bash -c 'echo "__EGL_VENDOR_LIBRARY_FILENAMES=/usr/share/glvnd/egl_vendor.d/10_nvidia.json" >> /etc/environment'
+    echo "✓ Fixed EGL vendor path"
+else
+    echo "✓ EGL vendor path already set"
+fi
+
+# Fix 2: DKMS modules for new kernels
+echo -e "\n[2/5] Checking DKMS modules for all installed kernels..."
+bash ./check-kernel-dkms
+echo "✓ DKMS modules verified"
+
+# Fix 3: Screen tearing and stutter
+echo -e "\n[3/5] Fixing screen tearing and stutter issues..."
+if ! grep -q "UseNvKmsCompositionPipeline" /etc/X11/xorg.conf 2>/dev/null; then
+    if [[ -f /etc/X11/xorg.conf ]]; then
+        # Add to Screen section if file exists
+        if grep -q "Section \"Screen\"" /etc/X11/xorg.conf; then
+            sudo sed -i '/Section "Screen"/,/EndSection/ s/EndSection/    Option "UseNvKmsCompositionPipeline" "Off"\nEndSection/' /etc/X11/xorg.conf
+            echo "✓ Added UseNvKmsCompositionPipeline option to xorg.conf"
+        else
+            echo "Screen section not found in xorg.conf"
+        fi
+    else
+        echo "xorg.conf not found, skipping composition pipeline fix"
+    fi
+else
+    echo "✓ UseNvKmsCompositionPipeline already configured"
+fi
+
+# Fix 4: Hardware acceleration for Firefox
+echo -e "\n[4/5] Setting up hardware acceleration for Firefox..."
+if [[ ! -f ~/.config/firefox.conf ]]; then
+    echo "Setting up Firefox hardware acceleration configuration..."
+    mkdir -p ~/.config/
+    cp HWAccel/firefox/firefox.conf ~/.config/
+    
+    # Add to .bashrc if not already there
+    if ! grep -q "firefox.conf" ~/.bashrc; then
+        echo 'export $(grep -v "^#" ~/.config/firefox.conf | xargs -d "\n")' >> ~/.bashrc
+        echo "✓ Added Firefox configuration to .bashrc"
+    fi
+    echo "✓ Firefox hardware acceleration configured"
+else
+    echo "✓ Firefox configuration already exists"
+fi
+
+# Fix 5: Check for desktop environment specific issues
+echo -e "\n[5/5] Checking desktop environment specific issues..."
+if command -v kded5 &>/dev/null || command -v plasmashell &>/dev/null; then
+    echo "KDE desktop detected"
+    # Check if desktop-autostart bundle is installed
+    if swupd bundle-list | grep -q "desktop-autostart"; then
+        echo "WARNING: desktop-autostart bundle is installed which can cause black screen in KDE"
+        echo "Run: sudo swupd bundle-remove desktop-autostart"
+    else
+        echo "✓ KDE configuration is correct"
+    fi
+elif command -v gnome-shell &>/dev/null; then
+    echo "GNOME desktop detected"
+    # Check HiDPI settings for GNOME
+    if command -v gsettings &>/dev/null; then
+        current_scale=$(gsettings get org.gnome.desktop.interface text-scaling-factor)
+        if [[ "$current_scale" != "1.0" ]]; then
+            echo "HiDPI detected, adjusting GNOME settings..."
+            gsettings set org.gnome.desktop.interface text-scaling-factor 1.0
+            gsettings set org.gnome.mutter experimental-features "['scale-monitor-framebuffer']"
+            echo "✓ Configured GNOME for HiDPI displays"
+        fi
+    fi
+    echo "✓ GNOME configuration checked"
+else
+    echo "Desktop environment could not be determined"
+fi
+
+echo -e "\n===== All fixes applied! ====="
+echo "Please reboot your system for all changes to take effect:"
+echo "sudo reboot"

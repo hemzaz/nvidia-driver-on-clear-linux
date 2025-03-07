@@ -5,9 +5,15 @@
 The build script installs minimum dependencies, builds, and installs the driver to `/usr/lib64/dri/`. Run the build and clean scripts as a normal user.
 
 ```bash
+# Using Makefile from the root directory (recommended)
+cd ..
+make hw-accel   # Builds and installs the NVIDIA VA-API driver
+make hw-clean   # Cleans the build artifacts
+
+# Or directly from this directory
 cd HWAccel
-bash ./build-all  # Builds and installs the NVIDIA VA-API driver.
-bash ./clean-all
+bash ./build-all  # Builds and installs the NVIDIA VA-API driver
+bash ./clean-all  # Cleans the build artifacts
 
 # rpmbuild/RPMS   # Folder preserved, clean manually if desired.
 ```
@@ -31,6 +37,9 @@ media.navigator.mediadatadecoder_vpx_enabled   true
 
 Required, for HW acceleration to work using NVIDIA driver 470 (or newer series).
 widget.dmabuf.force-enabled                    true
+
+Required for newer drivers (560+) with VA-API and Wayland:
+NVD_BACKEND=direct                           environment variable
 
 Optional, disables AV1 content; ensure false if your GPU lacks AV1 support.
 media.av1.enabled                              false

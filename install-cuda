@@ -3,7 +3,13 @@
 # shellcheck disable=SC2143
 # shellcheck source=/dev/null
 
-[[ $(source "/etc/os-release" 2>/dev/null; echo "$ID") == "clear-linux-os" ]] || exit 1
+# Source common utility functions if available
+if [[ -f "common.sh" ]]; then
+    source "common.sh"
+else
+    # Fallback to traditional check if common.sh is not available
+    [[ $(source "/etc/os-release" 2>/dev/null; echo "$ID") == "clear-linux-os" ]] || exit 1
+fi
 
 # CUDA installer script for NVIDIA graphics on Clear Linux OS.
 # Usage: ./install-cuda auto|latest|12.6|12.4|12.2|11.8|<pathname>
@@ -12,6 +18,12 @@
 #   https://developer.nvidia.com/cuda-toolkit-archive
 #   https://docs.nvidia.com/cuda/cuda-toolkit-release-notes/index.html
 #   https://github.com/NVIDIA/cuda-samples
+#
+# Latest CUDA versions as of March 2025:
+# - CUDA 12.6.3 - For driver 560+
+# - CUDA 12.4.1 - For driver 550+
+# - CUDA 12.2.2 - For driver 535+
+# - CUDA 11.8.0 - For driver 520+
 
 # The installer requires NVIDIA driver pre-installed.
 if [[ ! -d /proc/driver/nvidia ]]; then

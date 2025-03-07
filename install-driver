@@ -73,6 +73,8 @@ case "$1" in
           ;;
      565) inst_url="https://download.nvidia.com/XFree86/Linux-x86_64/565.77/NVIDIA-Linux-x86_64-565.77.run"
           ;;
+     570) inst_url="https://download.nvidia.com/XFree86/Linux-x86_64/570.53.14/NVIDIA-Linux-x86_64-570.53.14.run"
+          ;;
   vulkan) inst_url="https://developer.nvidia.com/downloads/vulkan-beta-5504081-linux"
           ;;
        *) if [[ "$1" =~ $path_regex1 ]]; then
@@ -101,7 +103,7 @@ case "$1" in
               fi
               inst_file="$1"
           else
-              echo "Usage: ${0##*/} latest|550|560|565|vulkan|<pathname>"
+              echo "Usage: ${0##*/} latest|550|560|565|570|vulkan|<pathname>"
               exit 1
           fi
 esac
@@ -147,7 +149,7 @@ if [[ "$inst_file" =~ $path_vulkan ]]; then
     patchlist+=("0005-6.12-drm_output_poll_changed.patch")
     patchlist+=("0006-6.12-Set-FOP_UNSIGNED_OFFSET.patch")
 elif [[ ${nvver1} -le 545 || ${nvver1} -eq 555 ]]; then
-    echo "ERROR: The ${nvver1} release is unsupported. Try 550, 560 or later release."
+    echo "ERROR: The ${nvver1} release is unsupported. Try 550, 560, 565, 570 or later release."
     exit 1
 elif [[ ${nvver1} -eq 550 && ${nvver2} -le 90 ]]; then
     echo "ERROR: The ${nvver1}.${nvver2} release is unsupported. Try later release."
@@ -162,6 +164,8 @@ elif [[ ${nvver1} -eq 560 && ${nvver2} -le 35 ]]; then
     patchlist+=("0005-6.12-drm_output_poll_changed.patch")
     patchlist+=("0006-6.12-Set-FOP_UNSIGNED_OFFSET.patch")
 elif [[ ${nvver1} -eq 565 && ${nvver2} -le 57 ]]; then
+    patchlist+=("0006-6.12-Set-FOP_UNSIGNED_OFFSET.patch")
+elif [[ ${nvver1} -eq 570 && ${nvver2} -le 54 ]]; then
     patchlist+=("0006-6.12-Set-FOP_UNSIGNED_OFFSET.patch")
 fi
 

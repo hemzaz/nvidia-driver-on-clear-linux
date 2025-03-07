@@ -3,10 +3,23 @@
 # shellcheck disable=SC2045,SC2164
 # shellcheck source=/dev/null
 
-[[ $(source "/etc/os-release" 2>/dev/null; echo "$ID") == "clear-linux-os" ]] || exit 1
+# Source common utility functions if available
+if [[ -f "common.sh" ]]; then
+    source "common.sh"
+else
+    # Fallback to traditional check if common.sh is not available
+    [[ $(source "/etc/os-release" 2>/dev/null; echo "$ID") == "clear-linux-os" ]] || exit 1
+fi
 
 # Driver pre-install script for NVIDIA graphics on Clear Linux OS.
 # Usage: ./pre-install-driver [ update ]
+# 
+# This script prepares the system for NVIDIA driver installation by:
+# 1. Creating necessary directories
+# 2. Installing required dependencies
+# 3. Configuring kernel parameters
+# 4. Setting up dynamic linker
+# 5. Creating service handlers
 
 action="$1"
 
